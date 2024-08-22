@@ -3,7 +3,7 @@ import logo from "../../public/logo.png";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [user, setUser] = useState(false);
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -31,14 +31,33 @@ function Navbar() {
         </ul>
       </div>
       <div className="hidden md:flex space-x-8 w-[20%]">
-        <ul className="flex space-x-8">
-          <li className="hover:underline hover:text-orange-500 cursor-pointer">
-            Sign in
-          </li>
-          <li className="hover:underline hover:text-orange-500 cursor-pointer">
-            Sign up
-          </li>
-        </ul>
+        {user ? (
+          <ul className="flex space-x-8">
+            <li className=" p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+              Sign in
+            </li>
+            <li className="p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+              Sign up
+            </li>
+          </ul>
+        ) : (
+          <ul className="flex space-x-4">
+            <li>
+              <img
+                src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                alt=""
+                srcset=""
+                className="rounded-full w-[40px] h-[40px] object-cover"
+              />
+            </li>
+            <li className=" p-2  font-semibold text-black rounded-md cursor-pointer">
+              name
+            </li>
+            <li className="p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+              profile{" "}
+            </li>
+          </ul>
+        )}
       </div>
       <div className="md:hidden  flex items-center">
         <button
@@ -76,12 +95,33 @@ function Navbar() {
           <li className="hover:underline hover:text-orange-500 cursor-pointer">
             Agent
           </li>
-          <li className="hover:underline hover:text-orange-500 cursor-pointer">
-            Sign in
-          </li>
-          <li className="hover:underline hover:text-orange-500 cursor-pointer">
-            Sign up
-          </li>
+          {user ? (
+            <ul className="flex space-x-8">
+              <li className=" p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+                Sign in
+              </li>
+              <li className="p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+                Sign up
+              </li>
+            </ul>
+          ) : (
+            <ul className="flex space-x-4">
+              <li>
+                <img
+                  src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                  alt=""
+                  srcset=""
+                  className="rounded-full w-[50px] h-[50px]"
+                />
+              </li>
+              <li className=" p-2  font-semibold text-black rounded-md cursor-pointer">
+                name
+              </li>
+              <li className="p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+                profile{" "}
+              </li>
+            </ul>
+          )}
         </ul>
       </div>
     </nav>

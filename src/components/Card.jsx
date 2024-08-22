@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 
 function Card({ item }) {
   return (
-    <div className="flex flex-col p-5 md:flex-row bg-white rounded-lg shadow-lg overflow-hidden ml-10 mb-10 md:mb-0 md:ml-0">
+    <div className="flex flex-col p-5 m-3 md:flex-row bg-white rounded-lg shadow-lg overflow-hidden ml-10 mb-10 md:mb-0 md:ml-0">
       <div className="w-full md:w-[250px] h-[250px] relative">
         <Link to={`/${item.id}`}>
           <img
             src={item.img}
             alt="property"
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 ease-in-out"
+            className="w-[300px] h-[300px] object-cover hover:scale-110 transition-transform duration-500 ease-in-out"
           />
         </Link>
       </div>
