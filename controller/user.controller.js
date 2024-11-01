@@ -4,11 +4,8 @@ import jwt from 'jsonwebtoken'
 export const getUsers = async (req, res) => {
   try {
     console.log("running well")
-      const { userName, email, password } = req.body;
-
-      
-
-  
+    const users = prisma.user.findMany();
+    res.send(200).json(users)
   } catch (error) {
       console.error('Error get users:', error);
       res.status(500).json({ error: 'Users get failed' });
