@@ -1,31 +1,47 @@
 import React, { useContext, useState } from "react";
 import Layout from "../components/Layout";
-import bg from "../../public/bg.png";
-import search from "../../public/search.png";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
+import UploadWidget from "./../components/UploadWidget";
 
 function UpdatePage() {
-  const [error, setError] = useState(false); // Fixed the typo here
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null); // For error messages
+
   const navigate = useNavigate();
   const { currUser, updateUser } = useContext(AuthContext);
+  const [avatar, setAvatar] = useState([]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const userName = e.target.username.value;
-    const email = e.target.email.value;
-    const password = e.target.password.value;
+
+    if (!userName || !email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:8080/auth/update", {
-        userName,
-        email,
-        password,
-      });
-      console.log(res.data);
-      navigate("/login");
+      const res = await axios.put(
+        `http://localhost:8080/user/updateUser/${currUser.id}`,
+        { userName, email, password, avatar: avatar[0] }, // Update data
+        {
+          withCredentials: true, // Include cookies in request
+        }
+      );
+      updateUser(res.data);
+      navigate("/profile");
     } catch (err) {
-      setError(true); // Fixed the typo here
-      console.log(err);
+      console.error(err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Authentication error. Please log in again.");
+      } else {
+        setError(
+          err.response?.data?.message || "Update failed. Please try again."
+        );
+      }
     }
   };
 
@@ -39,20 +55,22 @@ function UpdatePage() {
                 Update
               </h2>
               <form onSubmit={handleSubmit}>
-                {/* Username Field */}
+                {/* UserName Field */}
                 <div className="mb-4">
                   <label
-                    htmlFor="username"
+                    htmlFor="userName"
                     className="block text-gray-700 font-medium mb-2"
                   >
-                    Username
+                    UserName
                   </label>
                   <input
                     type="text"
-                    defaultValue={currUser.userName}
-                    id="username"
+                    name="userName"
+                    value={userName} // Controlled value
+                    onChange={(e) => setUserName(e.target.value)} // Handle change
+                    id="userName"
                     className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="Enter your username"
+                    placeholder="Enter your userName"
                   />
                 </div>
 
@@ -66,7 +84,9 @@ function UpdatePage() {
                   </label>
                   <input
                     type="email"
-                    defaultValue={currUser.email}
+                    name="email"
+                    onChange={(e) => setEmail(e.target.value)} // Handle change
+                    value={email} // Controlled value
                     id="email"
                     className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     placeholder="Enter your email"
@@ -84,6 +104,9 @@ function UpdatePage() {
                   <input
                     type="password"
                     id="password"
+                    name="password"
+                    value={password} // Controlled value
+                    onChange={(e) => setPassword(e.target.value)} // Handle change
                     className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     placeholder="Enter your password"
                   />
@@ -97,7 +120,7 @@ function UpdatePage() {
                   Update
                 </button>
               </form>
-              {error && <span className="text-red-500">Error in Signup</span>}{" "}
+              {error && <span className="text-red-500">{error}</span>}{" "}
               {/* Display error */}
             </div>
           </div>
@@ -105,10 +128,20 @@ function UpdatePage() {
         <div className="md:w-[50%]">
           <div className="mt-10 md:mt-0">
             <img
-              src={currUser.avatar || "/noavatar.jpg"}
-              alt="background"
+              src={avatar[0] || currUser.avatar || "/noavatar.jpg"}
+              alt="User Avatar"
               className="bg-orange-100 mt-20 mx-auto h-[350px] md:min-h-[400px] w-[80%] md:w-auto min-w-[400px] md:min-w-[450px]"
               srcSet=""
+            />
+            <UploadWidget
+              uwConfig={{
+                cloudName: "du8f2sn0y",
+                uploadPreset: "estate",
+                multiple: "false",
+                maxImageFileSize: 20000000,
+                folder: "avatars",
+              }}
+              setState={setAvatar}
             />
           </div>
         </div>

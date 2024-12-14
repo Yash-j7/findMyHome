@@ -1,48 +1,51 @@
 import React from "react";
 import Layout from "./../components/Layout";
 import Slider from "../components/Slider";
-import { singlePostData, userData } from "../components/dummydata";
-import Map from "../components/Map"; // Ensure this is correctly imported
+import Mapp from "../components/Map"; // Ensure this is correctly imported
 import pin from "../../public/pin.png"; // Ensure the correct path or use a public path like "/pin.png"
-import { listData } from "./../components/dummydata";
 import { MapContainer, Marker, Popup } from "react-leaflet";
 import { TileLayer } from "react-leaflet";
-import { Link } from "react-router-dom";
-
+import { Link, useLoaderData } from "react-router-dom";
+import DOMPurify from "dompurify";
 function SinglePage() {
+  const post = useLoaderData();
+  console.log("post details are", post);
   return (
     <Layout>
       <div className="md:flex md:flex-row p-5 m-2 flex flex-col">
         <div className="left w-full md:w-[60%]">
           <div className="slider">
-            <Slider images={singlePostData.images} />
+            <Slider images={post.images} />
           </div>
           <div className="info font-mono m-5">
             <div className="top flex  justify-between mr-10">
               <div className="decsc flex flex-col gap-2">
-                <h1 className="text-3xl font-bold">{singlePostData.title}</h1>
+                <h1 className="text-3xl font-bold">{post.title}</h1>
                 <div className="flex">
                   <img src={pin} height={10} width={20} alt="Location Pin" />
-                  {singlePostData.address}
+                  {post.address}
                 </div>
-                <h1 className="bg-orange-300 w-min ">
-                  ${singlePostData.price}
-                </h1>
+                <h1 className="bg-orange-300 w-min ">${post.price}</h1>
               </div>
               <div className="user rounded-lg h-[100px] w-[100px] bg-orange-200 flex flex-col justify-center items-center">
                 <img
                   className="rounded-full"
-                  src={userData.img}
+                  src={post.user.avatar}
                   height={70}
                   width={70}
-                  alt={userData.name}
+                  alt={post.user.userName}
                 />
-                {userData.name}
+                {post.user.userName}
               </div>
             </div>
-            <div className="bottom mt-3">
-              <p className="text-xs"> {singlePostData.description}</p>
-            </div>
+            <div
+              className="bottom mt-3"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  post.PostDetail.desc || "<p>No description available.</p>"
+                ),
+              }}
+            ></div>
           </div>
         </div>
         <div className="right w-full md:w-[50%] h-full">
@@ -58,7 +61,9 @@ function SinglePage() {
                   />
                   <div className="featureText">
                     <span className="text-md">Utilities</span>
-                    <p className="text-xs">Renter is responsible</p>
+                    <p className="text-xs">
+                      {post.PostDetail.utilities} is responsible
+                    </p>
                   </div>
                 </div>
                 <div className="feature flex gap-2">
@@ -69,7 +74,7 @@ function SinglePage() {
                   />
                   <div className="featureText">
                     <span className="text-md">Pet Policy</span>
-                    <p className="text-xs">Pets Allowed</p>
+                    <p className="text-xs">{post.PostDetail.pet}</p>
                   </div>
                 </div>
                 <div className="feature flex gap-2">
@@ -94,7 +99,7 @@ function SinglePage() {
                     src="/size.png"
                     alt="Size"
                   />
-                  <span>80 sqft</span>
+                  <span>{post.PostDetail.size} sqft</span>
                 </div>
                 <div className="size">
                   <img
@@ -102,7 +107,7 @@ function SinglePage() {
                     src="/bed.png"
                     alt="Beds"
                   />
-                  <span>2 beds</span>
+                  <span>{post.bedroom} beds</span>
                 </div>
                 <div className="size">
                   <img
@@ -151,7 +156,7 @@ function SinglePage() {
               </div>
               <p className="title mt-3 mb-2 text-xl">Location</p>
               <div className="mapContainer ">
-                <MapContainer
+                {/* <MapContainer
                   center={[52.4797, -1.90269]}
                   zoom={6}
                   scrollWheelZoom={false}
@@ -161,32 +166,25 @@ function SinglePage() {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  <Marker
-                    position={[
-                      singlePostData.latitude,
-                      singlePostData.longitude,
-                    ]}
-                  >
+                  <Marker position={[post.latitude, post.longitude]}>
                     <Popup>
                       <div className="flex">
                         <img
-                          src={singlePostData.img}
+                          src={post.img}
                           alt=""
                           className="w-[70px] h-[70px]"
                         />
                         <div className="text-sm ml-2">
-                          <Link to={`/${singlePostData.id}`}>
-                            {singlePostData.title}
-                          </Link>
+                          <Link to={`/${post.id}`}>{post.title}</Link>
 
-                          <span> bedroom {singlePostData.bedroom}</span>
+                          <span> bedroom {post.bedroom}</span>
                           <br />
-                          <b>$ {singlePostData.price}</b>
+                          <b>$ {post.price}</b>
                         </div>
                       </div>
                     </Popup>
                   </Marker>
-                </MapContainer>
+                </MapContainer> */}
               </div>
               <div className="buttons flex justify-around mt-3">
                 <button>

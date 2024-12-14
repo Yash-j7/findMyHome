@@ -27,52 +27,53 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { userName, password } = req.body;
+
   try {
-    // Check if user exists
+    // CHECK IF THE USER EXISTS
+
     const user = await prisma.user.findUnique({
       where: { userName },
     });
-    if (!user) {
-      return res.status(404).json({
-        message: "Invalid credentials",
-      });
-    }
 
-    // Check if password is correct
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return res.status(404).json({
-        message: "Invalid credentials",
-      });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid Credentials!" });
 
-    // Generate token and send it to the user
-    const age = 1000 * 60 * 60 * 24 * 7; // Token expiry time
+    // CHECK IF THE PASSWORD IS CORRECT
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid)
+      return res.status(400).json({ message: "Invalid Credentials!" });
+
+    // GENERATE COOKIE TOKEN AND SEND TO THE USER
+
+    // res.setHeader("Set-Cookie", "test=" + "myValue").json("success")
+    const age = 1000 * 60 * 60 * 24 * 7;
+
     const token = jwt.sign(
-      { id: user.id,
-        isAdmin : true,
-       },
+      {
+        id: user.id,
+        isAdmin: false,
+      },
       process.env.JWT_SECRET_KEY,
       { expiresIn: age }
     );
 
-    const { password:userPasswd, ...others } = user; // Exclude password from the user object
+    const { password: userPassword, ...userInfo } = user;
 
-    // Send the cookie and the response
-    return res
+    res
       .cookie("token", token, {
         httpOnly: true,
-        // secure: true, // Uncomment if you're using HTTPS
+        // secure:true,
         maxAge: age,
       })
-      .json(others);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "An error occurred during login",
-    });
+      .status(200)
+      .json(userInfo);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to login!" });
   }
 };
+
 
 export const logout = ((req,res) => {
     res.clearCookie("token").status(200).json({message:"Logout successfully"})

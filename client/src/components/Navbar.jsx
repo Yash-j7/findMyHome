@@ -52,7 +52,7 @@ function Navbar() {
               <img
                 src={currUser.avatar || "/noavatar.jpg"}
                 alt=""
-                srcset=""
+                srcSet=""
                 className="rounded-full w-[40px] h-[40px] object-cover"
               />
             </li>
@@ -116,7 +116,7 @@ function Navbar() {
                 <img
                   src={currUser.avatar || "/noavatar.jpg"}
                   alt=""
-                  srcset=""
+                  srcSet=""
                   className="rounded-full w-[50px] h-[50px]"
                 />
               </li>

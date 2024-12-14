@@ -17,10 +17,16 @@ function Login() {
     const password = e.target.password.value;
     setLoading(true); // Set loading to true when submitting
     try {
-      const res = await axios.post("http://localhost:8080/auth/login", {
-        userName,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:8080/auth/login",
+        {
+          userName,
+          password,
+        },
+        {
+          withCredentials: true, // Required to send/receive cookies
+        }
+      );
       console.log(res.data);
       updateUser(res.data);
       setLoading(false); // Set loading to false after success

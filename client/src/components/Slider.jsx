@@ -60,7 +60,7 @@ function Slider({ images }) {
           src={images[0]}
           className="rounded-lg"
           alt=""
-          srcset=""
+          srcSet=""
           onClick={() => setImage(0)}
         />
       </div>
@@ -72,7 +72,7 @@ function Slider({ images }) {
             key={i}
             onClick={() => setImage(i + 1)}
             alt=""
-            srcset=""
+            srcSet=""
           />
         ))}
       </div>

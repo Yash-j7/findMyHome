@@ -64,11 +64,13 @@ function Profile() {
               </button>
               <div className="flex justify-between mt-10">
                 <div className="text-2xl ">My List</div>
-                <div>
-                  <button className="bg-orange-300 p-2 font-mono font-semibold rounded-md">
-                    Add new List
-                  </button>
-                </div>
+                <Link to="/newPost">
+                  <div>
+                    <button className="bg-orange-300 p-2 font-mono font-semibold rounded-md">
+                      Add new Post
+                    </button>
+                  </div>
+                </Link>
               </div>
               <div className="mt-5">
                 {listData.map((item) => (
