@@ -1,15 +1,42 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import Layout from "./../components/Layout";
 import Slider from "../components/Slider";
 import Mapp from "../components/Map"; // Ensure this is correctly imported
 import pin from "../../public/pin.png"; // Ensure the correct path or use a public path like "/pin.png"
 import { MapContainer, Marker, Popup } from "react-leaflet";
 import { TileLayer } from "react-leaflet";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
+import { AuthContext } from "../context/authContext";
+import axios from "axios";
+import { useEffect } from "react";
 function SinglePage() {
   const post = useLoaderData();
   console.log("post details are", post);
+  const { currUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [saved, setSaved] = useState(post.isSaved);
+
+  const handleClick = async () => {
+    if (!currUser) {
+      navigate("/login");
+      return;
+    }
+
+    setSaved((prev) => !prev);
+
+    try {
+      await axios.post(
+        "http://localhost:8080/user/save",
+        { postId: post.id },
+        { withCredentials: true }
+      );
+    } catch (err) {
+      setSaved((prev) => !prev); // Revert on error
+      console.error("Error saving post:", err);
+    }
+  };
+
   return (
     <Layout>
       <div className="md:flex md:flex-row p-5 m-2 flex flex-col">
@@ -195,13 +222,17 @@ function SinglePage() {
                   />
                   Send a Message
                 </button>
-                <button>
+                <button
+                  onClick={handleClick}
+                  style={{ backgroundColor: saved ? "#fece51" : "white" }}
+                  className="bg-red-50 p-8"
+                >
                   <img
                     className="h-[25px] w-[25px]"
                     src="/save.png"
                     alt="Save"
                   />
-                  Save the Place
+                  {saved ? "Saved " : "Save"}
                 </button>
               </div>
             </div>

@@ -6,8 +6,11 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
+import { useLoaderData } from "react-router-dom";
 
 function Profile() {
+  const data = useLoaderData();
+  console.log("Data ", data);
   const [chat, setChat] = useState(1);
   const { currUser, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -72,8 +75,15 @@ function Profile() {
                   </div>
                 </Link>
               </div>
+              <div></div>
               <div className="mt-5">
-                {listData.map((item) => (
+                {data.userPost.map((item) => (
+                  <Card item={item} />
+                ))}
+              </div>
+              <div className="text-2xl ">Saved Post</div>
+              <div className="mt-5">
+                {data.savedPost.map((item) => (
                   <Card item={item} />
                 ))}
               </div>

@@ -2,29 +2,55 @@
 import prisma from './../lib/prisma.js';
 
 
-export const  getPost = (async(req,res) => {
+export const getPost = async (req, res) => {
     try {
-        const id = req.params.id
-        const post = await prisma.post.findUnique({
-            where : {id},
-            include:{
-                PostDetail:true,
-                user:{
-                    select:{
-                        userName:true,
-                        avatar:true
-                    }
-                }
-            }
-        })
-        res.status(200).json(post)
+      const id = req.params.id;
+  
+      const post = await prisma.post.findUnique({
+        where: { id },
+        include: {
+          PostDetail: true,
+          user: {
+            select: {
+              userName: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+  
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+  
+      const token = req.cookies?.token;
+  
+      if (token) {
+        try {
+          const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  
+          const saved = await prisma.savedPost.findUnique({
+            where: {
+              userId_postId: {
+                postId: id,
+                userId: payload.id,
+              },
+            },
+          });
+  
+          return res.status(200).json({ ...post, isSaved: saved ? true : false });
+        } catch (err) {
+          console.error("JWT verification failed:", err.message);
+        }
+      }
+  
+      res.status(200).json({ ...post, isSaved: false });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({message:"error in getPost controller"})
+      console.error("Error in getPost controller:", error);
+      res.status(500).json({ message: "Error in getPost controller" });
     }
-    
-})
-export const getPosts = async (req, res) => {
+  };
+  export const getPosts = async (req, res) => {
     const query = req.query
     console.log(query)
     try {

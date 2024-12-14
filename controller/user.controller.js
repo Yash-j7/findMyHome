@@ -84,3 +84,67 @@ export const deleteUser = async (req, res) => {
       res.status(500).json({ error: 'User delete failed' });
   }
 };
+
+export const savePost = async (req, res) => {
+  const { postId } = req.body;
+  const tokenUserId = req.userId;
+
+  if (!postId || !tokenUserId) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    const savedPost = await prisma.savedPost.findUnique({
+      where: {
+        userId_postId: {
+          userId: tokenUserId,
+          postId,
+        },
+      },
+    });
+
+    if (savedPost) {
+      await prisma.savedPost.delete({
+        where: { id: savedPost.id },
+      });
+      return res.status(200).json({ message: "Post removed from saved" });
+    } else {
+      await prisma.savedPost.create({
+        data: {
+          userId: tokenUserId,
+          postId,
+        },
+      });
+      return res.status(200).json({ message: "Post saved successfully" });
+    }
+  } catch (error) {
+    console.error("Error in savePost controller:", error);
+    res.status(500).json({ error: "Error saving post" });
+  }
+};
+
+export const profilePost = async (req, res) => {
+  try {
+      const tokenUserId = req.params.id;
+      const userPost = await prisma.post.findMany(
+        {
+          where : {userId:tokenUserId}
+        }
+      );
+      const saved = await prisma.savedPost.findMany(
+        {
+          where : {userId:tokenUserId},
+          include:{
+            post:true
+          }
+        }
+      );
+      const savedPost = saved.map(item => item.post)
+    res.status(200).json({userPost, savedPost})
+
+      
+  } catch (error) {
+      console.error('Error profile:', error);
+      res.status(500).json({ error: 'User profile error' });
+  }
+};

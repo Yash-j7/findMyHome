@@ -11,3 +11,10 @@ export const listPageLoader = async ({ request, params }) => {
   const res = await axios.get(`http://localhost:8080/post?${query}`);
   return res.data;
 };
+
+export const profilePageLoader = async () => {
+  const res = await axios.get("http://localhost:8080/user/profilePost", {
+    withCredentials: true, // Include cookies in request
+  });
+  return res.data;
+};
