@@ -17,4 +17,8 @@ export const profilePageLoader = async () => {
     withCredentials: true, // Include cookies in request
   });
   return res.data;
+  // const chatPromise = await axios.get("http://localhost:8080/chat", {
+  //   withCredentials: true,
+  // });
+  // return chatPromise.data;
 };

@@ -4,6 +4,8 @@ import authRoute from './routes/auth.routes.js';
 import userRoute from './routes/user.routes.js';
 import postRoute from './routes/post.routes.js'
 import testRoute from './routes/test.routes.js'
+import messageRoute from './routes/message.routes.js'
+import chatRoute from './routes/chat.routes .js'
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -26,6 +28,8 @@ app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/test", testRoute);
+app.use("/chat", chatRoute);
+app.use("/message", messageRoute);
 
 const PORT = 8080;
 app.listen(PORT, () => {

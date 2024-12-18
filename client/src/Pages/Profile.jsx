@@ -45,7 +45,7 @@ function Profile() {
                 <img
                   src={currUser.avatar || "/noavatar.jpg"}
                   alt=""
-                  srcset=""
+                  srcSet=""
                   className="rounded-full object-cover w-[40px] h-[40px]"
                 />
               </div>
