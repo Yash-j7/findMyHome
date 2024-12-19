@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function Card({ item }) {
-  console.log(item);
   return (
     <div className="flex flex-col p-5 m-3 md:flex-row bg-white rounded-lg shadow-lg overflow-hidden ml-10 mb-10 md:mb-0 md:ml-0">
       <div className="w-full md:w-[250px] h-[250px] relative">

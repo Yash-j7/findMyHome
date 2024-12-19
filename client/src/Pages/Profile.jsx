@@ -9,8 +9,11 @@ import { AuthContext } from "../context/authContext";
 import { useLoaderData } from "react-router-dom";
 
 function Profile() {
-  const data = useLoaderData();
+  const { data } = useLoaderData();
+  const { chats } = useLoaderData();
+
   console.log("Data ", data);
+  console.log("Chats ", chats);
   const [chat, setChat] = useState(1);
   const { currUser, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -77,33 +80,39 @@ function Profile() {
               </div>
               <div></div>
               <div className="mt-5">
-                {data.userPost.map((item) => (
-                  <Card item={item} />
+                {data.userPost.map((item, index) => (
+                  <Card item={item} key={index} />
                 ))}
               </div>
               <div className="text-2xl ">Saved Post</div>
               <div className="mt-5">
-                {data.savedPost.map((item) => (
-                  <Card item={item} />
+                {data.savedPost.map((item, index) => (
+                  <Card item={item} key={index} />
                 ))}
               </div>
             </div>
           </div>
           <div className="chat w-full md:w-[50%] bg-orange-100 p-2 m-2 h-[800px] flex flex-col">
             <div className="messages flex flex-col gap-[20px] w-[100%] h-[45%] overflow-y-scroll">
-              <h1 className="text-xl font-semibold font-mono">Messages</h1>
               <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px]  object-cover"
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
+                <h1 className="text-xl font-semibold font-mono">Messages</h1>
+                {chats?.map((c) => (
+                  <div
+                    className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm"
+                    key={c.id}
+                    style={{
+                      backgroundColor:
+                        c.seenBy.includes(currentUser.id) || chat?.id === c.id
+                          ? "white"
+                          : "#fecd514e",
+                    }}
+                    onClick={() => handleOpenChat(c.id, c.receiver)}
+                  >
+                    <img src={c.receiver.avatar || "/noavatar.jpg"} alt="" />
+                    <span>{c.receiver.username}</span>
+                    <p>{c.lastMessage}</p>
+                  </div>
+                ))}
               </div>
 
               <div className="message">

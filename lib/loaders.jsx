@@ -16,9 +16,9 @@ export const profilePageLoader = async () => {
   const res = await axios.get("http://localhost:8080/user/profilePost", {
     withCredentials: true, // Include cookies in request
   });
-  return res.data;
-  // const chatPromise = await axios.get("http://localhost:8080/chat", {
-  //   withCredentials: true,
-  // });
-  // return chatPromise.data;
+  const chatPromise = await axios.get("http://localhost:8080/chat", {
+    withCredentials: true,
+  });
+  console.log(chatPromise);
+  return { data: res.data, chats: chatPromise.data };
 };

@@ -20,7 +20,7 @@ export const getChats = async (req, res) => {
         },
         select: {
           id: true,
-          username: true,
+          userName: true,
           avatar: true,
         },
       });
