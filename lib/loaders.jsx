@@ -13,12 +13,20 @@ export const listPageLoader = async ({ request, params }) => {
 };
 
 export const profilePageLoader = async () => {
-  const res = await axios.get("http://localhost:8080/user/profilePost", {
-    withCredentials: true, // Include cookies in request
-  });
-  const chatPromise = await axios.get("http://localhost:8080/chat", {
-    withCredentials: true,
-  });
-  console.log(chatPromise);
-  return { data: res.data, chats: chatPromise.data };
+  try {
+    const [res, chatPromise] = await Promise.all([
+      axios.get("http://localhost:8080/user/profilePost", {
+        withCredentials: true,
+      }),
+      axios.get("http://localhost:8080/chat", { withCredentials: true }),
+    ]);
+
+    console.log("res", res);
+    console.log("chatPromise", chatPromise);
+
+    return { data: res.data, chats: chatPromise.data };
+  } catch (error) {
+    console.error("Error in profilePageLoader:", error);
+    return { data: null, chats: null }; // Graceful fallback
+  }
 };

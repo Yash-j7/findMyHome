@@ -11,7 +11,7 @@ import { useLoaderData } from "react-router-dom";
 function Profile() {
   const { data } = useLoaderData();
   const { chats } = useLoaderData();
-
+  console.log(chats);
   console.log("Data ", data);
   console.log("Chats ", chats);
   const [chat, setChat] = useState(1);
@@ -25,6 +25,16 @@ function Profile() {
       const res = await axios.post("http://localhost:8080/auth/logout");
       updateUser(null);
       navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleChats = async () => {
+    try {
+      const d = await axios.get("http://localhost:8080/chat", {
+        withCredentials: true,
+      });
+      console.log(d);
     } catch (error) {
       console.log(error);
     }
@@ -96,13 +106,14 @@ function Profile() {
             <div className="messages flex flex-col gap-[20px] w-[100%] h-[45%] overflow-y-scroll">
               <div className="message">
                 <h1 className="text-xl font-semibold font-mono">Messages</h1>
+                <button onClick={handleChats}>btn</button>
                 {chats?.map((c) => (
                   <div
                     className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm"
                     key={c.id}
                     style={{
                       backgroundColor:
-                        c.seenBy.includes(currentUser.id) || chat?.id === c.id
+                        c.seenBy.includes(currUser.id) || chat?.id === c.id
                           ? "white"
                           : "#fecd514e",
                     }}

@@ -17,23 +17,30 @@ function SinglePage() {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(post.isSaved);
 
+  const [loading, setLoading] = useState(false);
+
   const handleClick = async () => {
     if (!currUser) {
       navigate("/login");
       return;
     }
 
-    setSaved((prev) => !prev);
+    console.log("Current saved state before update:", saved);
+    setSaved((prevSaved) => !prevSaved); // Optimistic toggle
 
     try {
+      setLoading(true); // Start loading
       await axios.post(
         "http://localhost:8080/user/save",
         { postId: post.id },
         { withCredentials: true }
       );
+      console.log("Post save/unsave successful");
     } catch (err) {
-      setSaved((prev) => !prev); // Revert on error
+      setSaved((prevSaved) => !prevSaved); // Revert on error
       console.error("Error saving post:", err);
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
