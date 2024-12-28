@@ -7,19 +7,21 @@ import axios from "axios";
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
 import { useLoaderData } from "react-router-dom";
-//need to work on it
+import { format } from "timeago.js";
+
 function Profile() {
   const { data } = useLoaderData();
   const { chats } = useLoaderData();
   console.log(chats);
   console.log("Data ", data);
   console.log("Chats ", chats);
-  const [chat, setChat] = useState(1);
+  const [chat, setChat] = useState(null);
   const { currUser, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
     if (!currUser) navigate("/login");
   }, [currUser, navigate]);
+  console.log(currUser);
   const handleLogout = async () => {
     try {
       const res = await axios.post("http://localhost:8080/auth/logout");
@@ -29,16 +31,38 @@ function Profile() {
       console.log(error);
     }
   };
-  const handleChats = async () => {
+  const handleOpenChat = async (id, receiver) => {
     try {
-      const d = await axios.get("http://localhost:8080/chat", {
+      const d = await axios.get("http://localhost:8080/chat/" + id, {
         withCredentials: true,
       });
-      console.log(d);
+      console.log("d = ", d);
+      setChat({ ...d.data, receiver });
     } catch (error) {
       console.log(error);
     }
   };
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    console.log(chat);
+    const formData = new FormData(e.target);
+    const text = formData.get("text");
+    console.log(text);
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/message/" + chat.id,
+        {
+          text,
+        },
+        { withCredentials: true }
+      );
+      setChat((prev) => ({ ...prev, messages: [...prev.messages, res.data] }));
+      e.target.reset();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     currUser && (
       <Layout>
@@ -106,7 +130,6 @@ function Profile() {
             <div className="messages flex flex-col gap-[20px] w-[100%] h-[45%] overflow-y-scroll">
               <div className="message">
                 <h1 className="text-xl font-semibold font-mono">Messages</h1>
-                <button onClick={handleChats}>btn</button>
                 {chats?.map((c) => (
                   <div
                     className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm"
@@ -119,206 +142,87 @@ function Profile() {
                     }}
                     onClick={() => handleOpenChat(c.id, c.receiver)}
                   >
-                    <img src={c.receiver.avatar || "/noavatar.jpg"} alt="" />
+                    <img
+                      src={c.receiver.avatar || "/noavatar.jpg"}
+                      alt=""
+                      className="rounded-full w-[30px]  h-[30px]"
+                    />
                     <span>{c.receiver.username}</span>
                     <p>{c.lastMessage}</p>
                   </div>
                 ))}
-              </div>
-
-              <div className="message">
-                <div className="flex items-center gap-4  bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
-              </div>
-              <div className="message">
-                <div className="flex items-center gap-4 bg-white w-[400px] cursor-pointer text-sm">
-                  <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    alt=""
-                    className="rounded-full w-[30px]  h-[30px] "
-                  />
-                  <p className="font-semibold flex-shrink-0">{userData.name}</p>
-                  <p className="flex-grow truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit...
-                  </p>
-                </div>
               </div>
             </div>
             {chat && (
               <div className="chats mt-10 bg-orange-300 w-full overflow-y-scroll h-[40%]">
                 <div className=" flex justify-between p-3">
                   <img
-                    src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                    src={chat.receiver.avatar || "/noavatar.jpg"}
                     alt=""
                     className="rounded-full w-[30px]  h-[30px] "
                   />
-                  {userData.name}
+                  {chat.receiver.userName}
                   <button className="text-2xl" onClick={() => setChat(null)}>
                     X
                   </button>
                 </div>
                 <div className="mid bg-orange-50">
-                  <div>
-                    <div className="flex  flex-col bg-orange-100 m-1">
-                      <p className="text-[14px] own self-end">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px] self-end">1 hour ago</p>
-                    </div>
-                    <div className="flex flex-col ">
-                      <p className="text-[14px]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px]">1 hour ago</p>
-                    </div>
-                    <div>
-                      <div className="flex flex-col bg-orange-100 m-1">
-                        <p className="text-[14px] own self-end">
-                          Lorem ipsum dolor sit amet, consectetur adipisicing
-                          elit.
-                        </p>
-                        <p className="text-[12px] self-end">1 hour ago</p>
+                  {chat.messages.map((m) => {
+                    console.log("m = ", m);
+                    console.log("curr = ", currUser);
+
+                    // Determine alignment based on message sender
+                    const isCurrentUser = m.userId === currUser.id;
+
+                    return (
+                      <div
+                        key={m.id}
+                        className={`flex ${
+                          isCurrentUser ? "justify-end" : "justify-start"
+                        } p-2`}
+                      >
+                        <div
+                          className={`flex flex-col ${
+                            isCurrentUser ? "bg-blue-100" : "bg-orange-100"
+                          } m-1 p-2 rounded-lg max-w-[60%]`}
+                        >
+                          <p
+                            className={`text-[14px] ${
+                              isCurrentUser
+                                ? "text-right self-end"
+                                : "text-left self-start"
+                            }`}
+                          >
+                            {m.text}
+                          </p>
+                          <p
+                            className={`text-[12px] text-gray-500 ${
+                              isCurrentUser ? "self-end" : "self-start"
+                            }`}
+                          >
+                            {format(m.createdAt)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col ">
-                      <p className="text-[14px]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px]">1 hour ago</p>
-                    </div>
-                    <div className="flex flex-col bg-orange-100 m-1">
-                      <p className="text-[14px] own self-end">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px] self-end">1 hour ago</p>
-                    </div>
-                    <div></div>
-                    <div className="flex flex-col ">
-                      <p className="text-[14px]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px]">1 hour ago</p>
-                    </div>
-                    <div>
-                      <div className="flex flex-col bg-orange-100 m-1">
-                        <p className="text-[14px] own self-end">
-                          Lorem ipsum dolor sit amet, consectetur adipisicing
-                          elit.
-                        </p>
-                        <p className="text-[12px] self-end">1 hour ago</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col ">
-                      <p className="text-[14px]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit.
-                      </p>
-                      <p className="text-[12px]">1 hour ago</p>
-                    </div>
-                    <div>
-                      <div className="flex flex-col bg-orange-100 m-1">
-                        <p className="text-[14px] own self-end">
-                          Lorem ipsum dolor sit amet, consectetur adipisicing
-                          elit.
-                        </p>
-                        <p className="text-[12px] self-end">1 hour ago</p>
-                      </div>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
             {chat && (
-              <div className="bottom mt-2 flex justify-between p-2">
-                <textarea
-                  placeholder="Start Typing"
-                  name=""
-                  id=""
-                  className="w-[80%] text-sm h-10 mt-1 p-2 outline-none cursor-text border-none"
-                ></textarea>
-                <button className="bg-orange-300 h-[50px] w-[70px] rounded-xl text-black font-semibold font-mono">
-                  Send
-                </button>
-              </div>
+              <form action="" onSubmit={handleSendMessage}>
+                <div className="bottom mt-2 flex justify-between p-2">
+                  <textarea
+                    placeholder="Start Typing"
+                    name="text"
+                    id=""
+                    className="w-[80%] text-sm h-10 mt-1 p-2 outline-none cursor-text border-none"
+                  ></textarea>
+                  <button className="bg-orange-300 h-[50px] w-[70px] rounded-xl text-black font-semibold font-mono">
+                    Send
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>
