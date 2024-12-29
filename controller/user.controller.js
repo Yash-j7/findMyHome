@@ -1,30 +1,26 @@
-import bcrypt from 'bcrypt'
-import prisma from '../lib/prisma.js'
-import jwt from 'jsonwebtoken'
+import bcrypt from "bcrypt";
+import prisma from "../lib/prisma.js";
+import jwt from "jsonwebtoken";
 export const getUsers = async (req, res) => {
   try {
-    console.log("running well")
-    const users = await prisma.user.findMany()
-    res.status(200).json(users)
+    console.log("running well");
+    const users = await prisma.user.findMany();
+    res.status(200).json(users);
   } catch (error) {
-      console.error('Error get users:', error);
-      res.status(500).json({ error: 'Users get failed' });
+    console.error("Error get users:", error);
+    res.status(500).json({ error: "Users get failed" });
   }
 };
 export const getUser = async (req, res) => {
   try {
-      const id = req.params.id;
-      const user = await prisma.user.findUnique(
-        {
-          where : {id}
-        }
-      );
-    res.status(200).json(user)
-
-      
+    const id = req.params.id;
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    res.status(200).json(user);
   } catch (error) {
-      console.error('Error get user:', error);
-      res.status(500).json({ error: 'User get failed' });
+    console.error("Error get user:", error);
+    res.status(500).json({ error: "User get failed" });
   }
 };
 export const updateUser = async (req, res) => {
@@ -74,14 +70,13 @@ export const deleteUser = async (req, res) => {
     }
 
     await prisma.user.delete({
-      where : {id},
-    })
+      where: { id },
+    });
 
-    res.status(200).json({message : "user deleted"})
-      
+    res.status(200).json({ message: "user deleted" });
   } catch (error) {
-      console.error('Error delete user:', error);
-      res.status(500).json({ error: 'User delete failed' });
+    console.error("Error delete user:", error);
+    res.status(500).json({ error: "User delete failed" });
   }
 };
 
@@ -125,26 +120,42 @@ export const savePost = async (req, res) => {
 
 export const profilePost = async (req, res) => {
   try {
-      const tokenUserId = req.params.id;
-      const userPost = await prisma.post.findMany(
-        {
-          where : {userId:tokenUserId}
-        }
-      );
-      const saved = await prisma.savedPost.findMany(
-        {
-          where : {userId:tokenUserId},
-          include:{
-            post:true
-          }
-        }
-      );
-      const savedPost = saved.map(item => item.post)
-    res.status(200).json({userPost, savedPost})
-
-      
+    const tokenUserId = req.params.id;
+    const userPost = await prisma.post.findMany({
+      where: { userId: tokenUserId },
+    });
+    const saved = await prisma.savedPost.findMany({
+      where: { userId: tokenUserId },
+      include: {
+        post: true,
+      },
+    });
+    const savedPost = saved.map((item) => item.post);
+    res.status(200).json({ userPost, savedPost });
   } catch (error) {
-      console.error('Error profile:', error);
-      res.status(500).json({ error: 'User profile error' });
+    console.error("Error profile:", error);
+    res.status(500).json({ error: "User profile error" });
+  }
+};
+
+export const setNotification = async (req, res) => {
+  const tokenUserId = req.userId;
+  try {
+    const number = await prisma.chat.count({
+      where: {
+        userIDs: {
+          hasSome: [tokenUserId],
+        },
+        NOT: {
+          seenBy: {
+            hasSome: [tokenUserId],
+          },
+        },
+      },
+    });
+    res.status(200).json(number);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed in notifcation!" });
   }
 };

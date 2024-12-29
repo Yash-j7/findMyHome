@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import logo from "../../public/logo.png";
 import { AuthContext } from "../context/authContext";
 import { Link } from "react-router-dom";
+import { useNotificationStore } from "./../lib/Notification";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +12,10 @@ function Navbar() {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
+  const fetch = useNotificationStore((state) => state.fetch);
+  const number = useNotificationStore((state) => state.number);
+  if (currUser) fetch();
+  console.log("number", number);
   return (
     <nav className="flex flex-wrap md:flex-nowrap items-center justify-between p-4 text-black font-mono">
       <div className="flex items-center space-x-4 w-[20%] md:ml-20">
@@ -59,9 +63,14 @@ function Navbar() {
             <li className=" p-2  font-semibold text-black rounded-md cursor-pointer">
               {currUser.userName}
             </li>
-            <li className="p-2  font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
-              <Link to="/profile">profile </Link>
-            </li>
+            <div className="relative p-2 font-semibold text-black rounded-md bg-orange-300 cursor-pointer">
+              <Link to="/profile" className="relative">
+                Profile
+                <div className=" rounded-full p-1 m-1 bg-red-800  text-white absolute left-[60px] bottom-[15px]">
+                  {number > 9 && number}
+                </div>
+              </Link>
+            </div>
           </ul>
         )}
       </div>

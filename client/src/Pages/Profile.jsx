@@ -8,6 +8,9 @@ import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
 import { useLoaderData } from "react-router-dom";
 import { format } from "timeago.js";
+import { SocketContext } from "../context/SocketContext";
+import { useRef } from "react";
+import { useNotificationStore } from "./../lib/Notification";
 
 function Profile() {
   const { data } = useLoaderData();
@@ -17,6 +20,7 @@ function Profile() {
   console.log("Chats ", chats);
   const [chat, setChat] = useState(null);
   const { currUser, updateUser } = useContext(AuthContext);
+  const { socket } = useContext(SocketContext);
   const navigate = useNavigate();
   useEffect(() => {
     if (!currUser) navigate("/login");
@@ -36,6 +40,9 @@ function Profile() {
       const d = await axios.get("http://localhost:8080/chat/" + id, {
         withCredentials: true,
       });
+      if (!d.data.seenBy.includes(currUser.id)) {
+        decrease();
+      }
       console.log("d = ", d);
       setChat({ ...d.data, receiver });
     } catch (error) {
@@ -58,10 +65,46 @@ function Profile() {
       );
       setChat((prev) => ({ ...prev, messages: [...prev.messages, res.data] }));
       e.target.reset();
+      socket.emit("sendMessage", {
+        receiverId: chat.receiver.id,
+        data: res.data,
+      });
     } catch (error) {
       console.log(error);
     }
   };
+  const messageEndRef = useRef();
+  const decrease = useNotificationStore((state) => state.decrease);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [chat]);
+  useEffect(() => {
+    const read = async () => {
+      try {
+        await axios.get("http://localhost:8080/chat/read" + chat.id, {
+          withCredentials: true,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (chat && socket) {
+      socket.on("getMessage", (data) => {
+        if (chat.id === data.chatId) {
+          setChat((prev) => ({ ...prev, messages: [...prev.messages, data] }));
+          read();
+        }
+      });
+    }
+    return () => {
+      socket.off("getMessage");
+    };
+  }, [socket, chat]);
 
   return (
     currUser && (
@@ -175,54 +218,62 @@ function Profile() {
                     const isCurrentUser = m.userId === currUser.id;
 
                     return (
-                      <div
-                        key={m.id}
-                        className={`flex ${
-                          isCurrentUser ? "justify-end" : "justify-start"
-                        } p-2`}
-                      >
+                      <>
                         <div
-                          className={`flex flex-col ${
-                            isCurrentUser ? "bg-blue-100" : "bg-orange-100"
-                          } m-1 p-2 rounded-lg max-w-[60%]`}
+                          key={m.id}
+                          className={`flex ${
+                            isCurrentUser ? "justify-end" : "justify-start"
+                          } p-2`}
                         >
-                          <p
-                            className={`text-[14px] ${
-                              isCurrentUser
-                                ? "text-right self-end"
-                                : "text-left self-start"
-                            }`}
+                          <div
+                            className={`flex flex-col ${
+                              isCurrentUser ? "bg-blue-100" : "bg-orange-100"
+                            } m-1 p-2 rounded-lg max-w-[60%]`}
                           >
-                            {m.text}
-                          </p>
-                          <p
-                            className={`text-[12px] text-gray-500 ${
-                              isCurrentUser ? "self-end" : "self-start"
-                            }`}
-                          >
-                            {format(m.createdAt)}
-                          </p>
+                            <p
+                              className={`text-[14px] ${
+                                isCurrentUser
+                                  ? "text-right self-end"
+                                  : "text-left self-start"
+                              }`}
+                            >
+                              {m.text}
+                            </p>
+                            <p
+                              className={`text-[12px] text-gray-500 ${
+                                isCurrentUser ? "self-end" : "self-start"
+                              }`}
+                            >
+                              {format(m.createdAt)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     );
                   })}
+                  <div
+                    ref={messageEndRef}
+                    style={{ margin: 0, padding: 0 }}
+                  ></div>
                 </div>
               </div>
             )}
             {chat && (
-              <form action="" onSubmit={handleSendMessage}>
-                <div className="bottom mt-2 flex justify-between p-2">
-                  <textarea
-                    placeholder="Start Typing"
-                    name="text"
-                    id=""
-                    className="w-[80%] text-sm h-10 mt-1 p-2 outline-none cursor-text border-none"
-                  ></textarea>
-                  <button className="bg-orange-300 h-[50px] w-[70px] rounded-xl text-black font-semibold font-mono">
-                    Send
-                  </button>
-                </div>
-              </form>
+              <div>
+                <form action="" onSubmit={handleSendMessage}>
+                  <div className="bottom mt-2 flex justify-between p-2">
+                    <textarea
+                      placeholder="Start Typing"
+                      name="text"
+                      id=""
+                      className="w-[80%] text-sm h-10 mt-1 p-2 outline-none cursor-text border-none"
+                    ></textarea>
+                    <button className="bg-orange-300 h-[50px] w-[70px] rounded-xl text-black font-semibold font-mono">
+                      Send
+                    </button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
         </div>
