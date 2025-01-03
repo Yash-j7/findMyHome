@@ -5,7 +5,7 @@ import Mapp from "../components/Map"; // Ensure this is correctly imported
 import pin from "../../public/pin.png"; // Ensure the correct path or use a public path like "/pin.png"
 import { MapContainer, Marker, Popup } from "react-leaflet";
 import { TileLayer } from "react-leaflet";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { AuthContext } from "../context/authContext";
 import axios from "axios";
@@ -16,6 +16,9 @@ function SinglePage() {
   const { currUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [saved, setSaved] = useState(post.isSaved);
+  const [chatting, setChatting] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [temp, setTemp] = useState(true);
 
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +44,36 @@ function SinglePage() {
       console.error("Error saving post:", err);
     } finally {
       setLoading(false); // End loading
+    }
+  };
+
+  const handleChat = async () => {
+    setTemp(false);
+    setChatting(true);
+  };
+  const handleMessage = async (e) => {
+    const formD = new FormData(e.target);
+    console.log(formD.get("text"));
+    const text = formD.get("text");
+    setChatting(false);
+    setSent(true);
+    e.preventDefault();
+    const paramsId = post.PostDetail.id;
+    console.log("ParamsId", paramsId);
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/message/" + paramsId,
+        {
+          text,
+        },
+        { withCredentials: true }
+      );
+      socket.emit("sendMessage", {
+        receiverId: chat.receiver.id,
+        data: res.data,
+      });
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -221,14 +254,36 @@ function SinglePage() {
                 </MapContainer> */}
               </div>
               <div className="buttons flex justify-around mt-3">
-                <button>
-                  <img
-                    className="h-[25px] w-[25px]"
-                    src="/chat.png"
-                    alt="Chat"
-                  />
-                  Send a Message
-                </button>
+                {temp && (
+                  <button onClick={handleChat}>
+                    <img
+                      className="h-[25px] w-[25px]"
+                      src="/chat.png"
+                      alt="Chat"
+                    />
+                    Send a Message
+                  </button>
+                )}
+                {chatting && (
+                  <div className="mt-5">
+                    <form action="" onSubmit={handleMessage}>
+                      <textarea name="text" id=""></textarea>
+                      <button className="ml-7">
+                        <img
+                          className="h-[25px] w-[25px]"
+                          src="/chat.png"
+                          alt="Chat"
+                        />
+                        Send
+                      </button>
+                    </form>
+                  </div>
+                )}
+                {sent && (
+                  <div className="mt-5">
+                    <p>Your message has been sent</p>
+                  </div>
+                )}
                 <button
                   onClick={handleClick}
                   style={{ backgroundColor: saved ? "#fece51" : "white" }}

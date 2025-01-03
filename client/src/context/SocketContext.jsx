@@ -5,18 +5,16 @@ import { AuthContext } from "./authContext";
 export const SocketContext = createContext();
 
 export const SocketContextProvider = ({ children }) => {
+  const { currentUser } = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
-  const { currUser } = useContext(AuthContext);
+
   useEffect(() => {
-    currUser && socket?.emit("newUser", currUser.id);
+    setSocket(io("http://localhost:5000"));
   }, []);
+
   useEffect(() => {
-    if (currUser && !socket) {
-      const newSocket = io("http://localhost:4000");
-      setSocket(newSocket);
-      return () => newSocket.disconnect(); // Clean up on unmount
-    }
-  }, [currUser]);
+    currentUser && socket?.emit("newUser", currentUser.id);
+  }, [currentUser, socket]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
